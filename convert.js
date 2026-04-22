@@ -273,10 +273,24 @@ function convertRegistrationXlsx(wb) {
     return { csv: rowsToCsv(out), count, outName: '報檢資料.csv' };
 }
 
+// 等 SheetJS 載入（最多 8 秒，每 200ms 檢查一次）
+async function waitForXLSX(timeoutMs = 8000) {
+    const deadline = Date.now() + timeoutMs;
+    while (typeof XLSX === 'undefined' && Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 200));
+    }
+    return typeof XLSX !== 'undefined';
+}
+
 xlsxConvertBtn.addEventListener('click', async () => {
     if (typeof XLSX === 'undefined') {
-        log(xlsxLog, '⚠ SheetJS 尚未載入完成', 'err');
-        return;
+        log(xlsxLog, '⏳ 等待 SheetJS 載入…', 'ok');
+        const ok = await waitForXLSX(8000);
+        if (!ok) {
+            log(xlsxLog, '⚠ SheetJS 載入失敗，請檢查網路或關閉擴充功能阻擋 CDN', 'err');
+            return;
+        }
+        log(xlsxLog, '✓ SheetJS 已載入', 'ok');
     }
     xlsxConvertBtn.disabled = true;
     for (let i = 0; i < xlsxFiles.length; i++) {
