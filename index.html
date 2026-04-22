@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>檔案轉檔工具 — PDF→TXT / XLSX→CSV</title>
+  <meta name="description" content="PDF→TXT / XLSX→CSV 轉檔工具。所有轉檔在瀏覽器本地執行，檔案不會上傳任何伺服器。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.1/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="style.css?v=1" />
+</head>
+
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>🔄 檔案轉檔工具</h1>
+      <p class="subtitle">PDF → TXT ・ XLSX → CSV ・ 純前端本地處理</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="privacy-notice">
+      <strong>🔒 隱私保證</strong>
+      所有轉檔都在您的瀏覽器裡處理，檔案<strong>絕對不上傳任何伺服器</strong>。
+      關閉分頁後資料即消失。
+    </div>
+
+    <!-- PDF → TXT -->
+    <div class="card">
+      <h2>📄 座位表 PDF → TXT</h2>
+      <p class="desc">將座位表 PDF 轉成純文字檔，供管理職類查詢系統調閱。取代「Google 文件開啟 → 另存 TXT」的手動流程。</p>
+      <label class="drop-zone" id="pdfDrop">
+        <div class="icon">📄</div>
+        <div class="main-text">拖曳 PDF 檔到這裡或點擊選取</div>
+        <div class="sub-text">支援多檔、.pdf 格式</div>
+        <input type="file" id="pdfInput" accept=".pdf,application/pdf" multiple />
+      </label>
+      <div class="file-list" id="pdfFileList"></div>
+      <div class="actions">
+        <button class="btn-primary" id="pdfConvertBtn" disabled>🔄 開始轉檔並下載 TXT</button>
+        <button class="btn-outline" id="pdfClearBtn">清除</button>
+      </div>
+      <div class="log" id="pdfLog"></div>
+    </div>
+
+    <!-- XLSX → CSV -->
+    <div class="card">
+      <h2>📊 報檢資料 XLSX → CSV</h2>
+      <p class="desc">自動辨識術科報檢資料或學科報檢資料，<strong>過濾電話、MAIL、地址等個資</strong>，只輸出查詢必要的欄位。</p>
+      <label class="drop-zone" id="xlsxDrop">
+        <div class="icon">📊</div>
+        <div class="main-text">拖曳 XLSX 檔到這裡或點擊選取</div>
+        <div class="sub-text">自動辨識術科（SKT1）/ 學科報檢資料</div>
+        <input type="file" id="xlsxInput" accept=".xlsx,.xls" multiple />
+      </label>
+      <div class="file-list" id="xlsxFileList"></div>
+      <div class="actions">
+        <button class="btn-primary" id="xlsxConvertBtn" disabled>🔄 開始轉檔並下載 CSV</button>
+        <button class="btn-outline" id="xlsxClearBtn">清除</button>
+      </div>
+      <div class="log" id="xlsxLog"></div>
+    </div>
+
+    <div class="card">
+      <h2>📖 使用說明</h2>
+      <div class="help-section">
+        <h3>PDF → TXT</h3>
+        <ol>
+          <li>上傳場次座位表 PDF</li>
+          <li>自動抽取所有頁面文字，保留原排版換行</li>
+          <li>下載 .txt 後上傳到對應 Drive 資料夾</li>
+        </ol>
+        <h3>XLSX → CSV</h3>
+        <ol>
+          <li>術科報檢資料（含 SKT1 sheet）→ 產出 <code>報檢資料.csv</code>（8 欄位）</li>
+          <li>檔名含「學科報檢資料」→ 產出 <code>學科報檢資料.csv</code>（7 欄位）</li>
+          <li>電話、MAIL、地址、生日等個資欄位自動過濾</li>
+          <li>UTF-8 BOM 編碼，Excel 雙擊開啟不亂碼</li>
+        </ol>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>🔒 純前端工具 — 沒有後端、沒有追蹤、沒有上傳</p>
+    <p style="font-size:0.8rem;color:#94a3b8;margin-top:6px">© 2026 ISHA 台中職訓中心</p>
+  </footer>
+
+  <script type="module" src="convert.js?v=1"></script>
+</body>
+
+</html>
