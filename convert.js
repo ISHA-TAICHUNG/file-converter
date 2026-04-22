@@ -112,33 +112,52 @@ pdfConvertBtn.addEventListener('click', async () => {
         try {
             const buf = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-            const parts = [];
+            const allLines = [];
             for (let p = 1; p <= pdf.numPages; p++) {
                 const page = await pdf.getPage(p);
                 const content = await page.getTextContent();
-                let lastY = null;
-                let line = '';
-                content.items.forEach(it => {
+                // 步驟 1：依 y 座標分行（容差 3 pt）
+                // 步驟 2：同行按 x 座標升序（左 → 右）
+                // 步驟 3：相鄰 item 間若 x 有較大 gap 則加空格
+                const rows = []; // [{y, items:[{x, str}]}]
+                for (const it of content.items) {
+                    if (!it.str || !it.str.trim()) continue;
+                    const x = it.transform[4];
                     const y = it.transform[5];
-                    if (lastY !== null && Math.abs(y - lastY) > 2) {
-                        parts.push(line.trimEnd());
-                        line = '';
+                    // 找同 y 的既有行
+                    let row = rows.find(r => Math.abs(r.y - y) <= 3);
+                    if (!row) {
+                        row = { y, items: [] };
+                        rows.push(row);
                     }
-                    line += it.str;
-                    if (it.hasEOL) {
-                        parts.push(line.trimEnd());
-                        line = '';
+                    row.items.push({ x, str: it.str, width: it.width || 0 });
+                }
+                // 依 y 降序排行（PDF 座標 y 從底部算起，閱讀順序是 y 大 → 小）
+                rows.sort((a, b) => b.y - a.y);
+                for (const row of rows) {
+                    row.items.sort((a, b) => a.x - b.x);
+                    let line = '';
+                    let lastEnd = null;
+                    for (const it of row.items) {
+                        if (lastEnd !== null) {
+                            const gap = it.x - lastEnd;
+                            // gap > 2 pt 視為需要空格分隔
+                            if (gap > 2 && !line.endsWith(' ') && !it.str.startsWith(' ')) {
+                                line += ' ';
+                            }
+                        }
+                        line += it.str;
+                        lastEnd = it.x + (it.width || 0);
                     }
-                    lastY = y;
-                });
-                if (line) parts.push(line.trimEnd());
+                    allLines.push(line.replace(/\s+/g, ' ').trim());
+                }
             }
-            const txt = parts.join('\n');
+            const txt = allLines.filter(l => l).join('\n');
             const outName = file.name.replace(/\.pdf$/i, '.txt');
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
             downloadBlob(blob, outName);
             updateStatus(pdfFileList, i, 'done', '✓ ' + outName);
-            log(pdfLog, `✓ ${file.name} → ${outName}（${pdf.numPages} 頁、${parts.length} 行）`, 'ok');
+            log(pdfLog, `✓ ${file.name} → ${outName}（${pdf.numPages} 頁、${allLines.length} 行）`, 'ok');
         } catch (err) {
             updateStatus(pdfFileList, i, 'error', '✗ 失敗');
             log(pdfLog, `✗ ${file.name}: ${err.message || err}`, 'err');
