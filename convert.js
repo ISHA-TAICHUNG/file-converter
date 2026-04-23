@@ -179,9 +179,23 @@ const WRITTEN_FIELD_MAP = {
     '測試日期': 'exdate',
     '測試時間': 'extime'
 };
+// 報檢資料允許輸出之欄位（英文欄位名，大寫比對）
+// IDNO 會被特別處理：輸出欄位改為 IDNO_LAST4，僅保留末 4 碼
+// 2026-04-23 更新：完整身分證字號不再寫入 CSV，降低個資敏感度
 const ALLOWED_REG_FIELDS = new Set([
     'IDNO', 'NAME', 'AENO', 'PNO', 'EGR', 'DSTNG', 'OPEXDT', 'OPEXTIME'
 ]);
+
+// 身分證欄位裁切設定：轉換輸出時把 IDNO 替換成 IDNO_LAST4
+const IDNO_TRANSFORM = {
+    source: 'IDNO',         // 原英文欄位名
+    zhNew: '身分證末4碼',   // 新中文標題
+    enNew: 'IDNO_LAST4',    // 新英文欄位名
+    transform: v => {        // 裁切函式
+        const s = String(v == null ? '' : v).trim();
+        return s.length >= 4 ? s.slice(-4) : s;
+    }
+};
 
 const xlsxDrop = document.getElementById('xlsxDrop');
 const xlsxInput = document.getElementById('xlsxInput');
@@ -253,21 +267,38 @@ function convertRegistrationXlsx(wb) {
     const zhHeaders = rows[0];
     const enFields = rows[1];
     const keepIdx = [];
+    let idnoIdx = -1; // 記錄 IDNO 欄位位置（要裁切為末 4 碼）
     enFields.forEach((f, i) => {
         if (f && ALLOWED_REG_FIELDS.has(String(f).trim().toUpperCase())) {
             keepIdx.push(i);
+            if (String(f).trim().toUpperCase() === IDNO_TRANSFORM.source) {
+                idnoIdx = i;
+            }
         }
     });
     if (keepIdx.length === 0) throw new Error('找不到預期的欄位');
-    const out = [
-        keepIdx.map(i => zhHeaders[i]),
-        keepIdx.map(i => enFields[i])
-    ];
+
+    // 輸出標題列：IDNO 欄位名改為 IDNO_LAST4
+    const outZhHeaders = keepIdx.map(i =>
+        i === idnoIdx ? IDNO_TRANSFORM.zhNew : zhHeaders[i]
+    );
+    const outEnFields = keepIdx.map(i =>
+        i === idnoIdx ? IDNO_TRANSFORM.enNew : enFields[i]
+    );
+    const out = [outZhHeaders, outEnFields];
+
     let count = 0;
     for (let r = 2; r < rows.length; r++) {
         const row = rows[r];
         if (!row || !row[keepIdx[0]]) continue;
-        out.push(keepIdx.map(i => (row[i] !== null && row[i] !== undefined) ? String(row[i]) : ''));
+        out.push(keepIdx.map(i => {
+            const v = row[i];
+            if (i === idnoIdx) {
+                // 身分證 → 只留末 4 碼
+                return IDNO_TRANSFORM.transform(v);
+            }
+            return (v !== null && v !== undefined) ? String(v) : '';
+        }));
         count++;
     }
     return { csv: rowsToCsv(out), count, outName: '報檢資料.csv' };

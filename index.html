@@ -51,7 +51,7 @@
     <!-- XLSX → CSV -->
     <div class="card">
       <h2>📊 報檢資料 XLSX → CSV</h2>
-      <p class="desc">自動辨識術科報檢資料或學科報檢資料，<strong>過濾電話、MAIL、地址等個資</strong>，只輸出查詢必要的欄位。</p>
+      <p class="desc">自動辨識術科報檢資料或學科報檢資料，<strong>過濾電話、MAIL、地址等個資</strong>；<strong>身分證僅保留末 4 碼</strong>，只輸出查詢必要的欄位。</p>
       <label class="drop-zone" id="xlsxDrop">
         <div class="icon">📊</div>
         <div class="main-text">拖曳 XLSX 檔到這裡或點擊選取</div>
@@ -80,6 +80,7 @@
           <li>術科報檢資料（含 SKT1 sheet）→ 產出 <code>報檢資料.csv</code>（8 欄位）</li>
           <li>檔名含「學科報檢資料」→ 產出 <code>學科報檢資料.csv</code>（7 欄位）</li>
           <li>電話、MAIL、地址、生日等個資欄位自動過濾</li>
+          <li><strong>身分證字號自動裁切為末 4 碼（IDNO_LAST4），完整字號絕不輸出</strong></li>
           <li>UTF-8 BOM 編碼，Excel 雙擊開啟不亂碼</li>
         </ol>
       </div>
@@ -91,7 +92,7 @@
     <p style="font-size:0.8rem;color:#94a3b8;margin-top:6px">© 2026 ISHA 台中職訓中心</p>
   </footer>
 
-  <script type="module" src="convert.js?v=4"></script>
+  <script type="module" src="convert.js?v=5"></script>
 </body>
 
 </html>
