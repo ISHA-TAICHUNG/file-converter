@@ -12,7 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
     onerror="this.onerror=null;this.src='https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'"></script>
 
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 
 <body>
@@ -32,8 +32,8 @@
 
     <!-- PDF → TXT -->
     <div class="card">
-      <h2>📄 座位表 PDF → TXT</h2>
-      <p class="desc">將座位表 PDF 轉成純文字檔，供管理職類查詢系統調閱。取代「Google 文件開啟 → 另存 TXT」的手動流程。</p>
+      <h2>📄 成績單簽收總表 PDF → TXT</h2>
+      <p class="desc">將成績單簽收總表 PDF 轉成純文字檔，供管理職類查詢系統直接讀取。輸出的 TXT 檔名會自動包含「成績單簽收總表」。</p>
       <label class="drop-zone" id="pdfDrop">
         <div class="icon">📄</div>
         <div class="main-text">拖曳 PDF 檔到這裡或點擊選取</div>
@@ -71,9 +71,9 @@
       <div class="help-section">
         <h3>PDF → TXT</h3>
         <ol>
-          <li>上傳場次座位表 PDF</li>
+          <li>上傳成績單簽收總表 PDF（忠明、龍井可分別轉檔）</li>
           <li>自動抽取所有頁面文字，保留原排版換行</li>
-          <li>下載 .txt 後上傳到對應 Drive 資料夾</li>
+          <li>下載 .txt 後上傳到管理職類查詢 Drive 資料夾；檔名含「成績單簽收」就會被後端讀取</li>
         </ol>
         <h3>XLSX → CSV</h3>
         <ol>
@@ -92,7 +92,7 @@
     <p style="font-size:0.8rem;color:#94a3b8;margin-top:6px">© 2026 ISHA 台中職訓中心</p>
   </footer>
 
-  <script type="module" src="convert.js?v=5"></script>
+  <script type="module" src="convert.js?v=6"></script>
 </body>
 
 </html>

@@ -36,6 +36,15 @@ function downloadBlob(blob, filename) {
     }, 100);
 }
 
+function buildSignoffTxtName(filename) {
+    const baseName = filename.replace(/\.pdf$/i, '').trim();
+    const safeName = baseName || '轉檔結果';
+    if (safeName.includes('成績單簽收')) {
+        return safeName + '.txt';
+    }
+    return '成績單簽收總表-' + safeName + '.txt';
+}
+
 function renderFileList(listEl, files) {
     listEl.textContent = '';
     files.forEach((f, i) => {
@@ -153,7 +162,7 @@ pdfConvertBtn.addEventListener('click', async () => {
                 }
             }
             const txt = allLines.filter(l => l).join('\n');
-            const outName = file.name.replace(/\.pdf$/i, '.txt');
+            const outName = buildSignoffTxtName(file.name);
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
             downloadBlob(blob, outName);
             updateStatus(pdfFileList, i, 'done', '✓ ' + outName);
