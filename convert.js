@@ -45,6 +45,23 @@ function buildSignoffTxtName(filename) {
     return '成績單簽收總表-' + safeName + '.txt';
 }
 
+function analyzeSignoffText(txt) {
+    const lines = String(txt || '').split(/\r?\n/).filter(l => l.trim());
+    let studentCount = 0;
+    for (const line of lines) {
+        const text = line.trim();
+        // 與管理職類查詢 GAS parser 對齊：
+        // 座號 + 遮罩身分證 + 姓名 + 期別 + 准考證號 + 職類
+        if (/^\d{4}\s+[A-Z]\d{2}X{5}\d{2}\s+\S+\s+/.test(text)) {
+            studentCount++;
+        }
+    }
+    return {
+        lineCount: lines.length,
+        studentCount,
+    };
+}
+
 function renderFileList(listEl, files) {
     listEl.textContent = '';
     files.forEach((f, i) => {
@@ -163,10 +180,16 @@ pdfConvertBtn.addEventListener('click', async () => {
             }
             const txt = allLines.filter(l => l).join('\n');
             const outName = buildSignoffTxtName(file.name);
+            const analysis = analyzeSignoffText(txt);
             const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
             downloadBlob(blob, outName);
-            updateStatus(pdfFileList, i, 'done', '✓ ' + outName);
-            log(pdfLog, `✓ ${file.name} → ${outName}（${pdf.numPages} 頁、${allLines.length} 行）`, 'ok');
+            if (analysis.studentCount > 0) {
+                updateStatus(pdfFileList, i, 'done', `✓ ${analysis.studentCount} 筆`);
+                log(pdfLog, `✓ ${file.name} → ${outName}（${pdf.numPages} 頁、${analysis.lineCount} 行、解析到 ${analysis.studentCount} 筆學生記錄）`, 'ok');
+            } else {
+                updateStatus(pdfFileList, i, 'warning', '⚠ 0 筆');
+                log(pdfLog, `⚠ ${file.name} → ${outName}（${pdf.numPages} 頁、${analysis.lineCount} 行、未解析到學生記錄，請確認是否為成績單簽收總表）`, 'warn');
+            }
         } catch (err) {
             updateStatus(pdfFileList, i, 'error', '✗ 失敗');
             log(pdfLog, `✗ ${file.name}: ${err.message || err}`, 'err');

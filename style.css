@@ -176,6 +176,11 @@ main {
   color: #166534;
 }
 
+.status.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .status.error {
   background: #fee2e2;
   color: #991b1b;
@@ -248,6 +253,10 @@ main {
 
 .log-line.ok {
   color: #86efac;
+}
+
+.log-line.warn {
+  color: #fde68a;
 }
 
 .log-line.err {
